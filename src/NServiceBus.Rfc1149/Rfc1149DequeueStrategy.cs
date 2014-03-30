@@ -16,7 +16,7 @@ namespace NServiceBus.Rfc1149
     {
         public bool PurgeOnStartup { get; set; }
 
-        private DirectoryInfo queueDir;
+        private Address address;
         private CancellationTokenSource tokenSource;
         private Func<TransportMessage, bool> tryProcessMessage;
         private Action<TransportMessage, Exception> endProcessMessage;
@@ -31,9 +31,9 @@ namespace NServiceBus.Rfc1149
 
         public void Init(Address address, Unicast.Transport.TransactionSettings transactionSettings, Func<TransportMessage, bool> tryProcessMessage, Action<TransportMessage, Exception> endProcessMessage)
         {
+            this.address = address;
             this.tryProcessMessage = tryProcessMessage;
             this.endProcessMessage = endProcessMessage;
-            this.queueDir = Utils.GetQueueDirectory(address);
 
             if (PurgeOnStartup)
                 Purge();
@@ -126,17 +126,22 @@ namespace NServiceBus.Rfc1149
 
         private ReceiveResult Receive()
         {
-            foreach(var file in queueDir.EnumerateFiles())
+            var queueDir = Utils.GetQueueDirectory(address);
+            if (queueDir != null)
             {
-                for (int i = 0; i < 3; i++)
+
+                foreach (var file in queueDir.EnumerateFiles())
                 {
-                    try
+                    for (int i = 0; i < 3; i++)
                     {
-                        return TryReadFile(file);
-                    }
-                    catch (IOException)
-                    {
-                        Thread.Sleep(10);
+                        try
+                        {
+                            return TryReadFile(file);
+                        }
+                        catch (IOException)
+                        {
+                            Thread.Sleep(10);
+                        }
                     }
                 }
             }
@@ -190,9 +195,13 @@ namespace NServiceBus.Rfc1149
 
         private void Purge()
         {
-            var files = queueDir.GetFiles();
-            foreach (var file in files)
-                file.Delete();
+            var queueDir = Utils.GetQueueDirectory(address);
+            if (queueDir != null)
+            {
+                var files = queueDir.GetFiles();
+                foreach (var file in files)
+                    file.Delete();
+            }
         }
 
         class ReceiveResult : IDisposable

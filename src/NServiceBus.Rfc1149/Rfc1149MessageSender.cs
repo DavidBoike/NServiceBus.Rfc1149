@@ -19,6 +19,9 @@ namespace NServiceBus.Rfc1149
             try
             {
                 var queueDir = Utils.GetQueueDirectory(address);
+                if (queueDir == null)
+                    return;
+
                 string fileName = String.Format("{0}.rfc1149", message.Id);
                 string filePath = Path.Combine(queueDir.FullName, fileName);
 

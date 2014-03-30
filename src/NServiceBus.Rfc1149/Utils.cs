@@ -11,7 +11,6 @@ namespace NServiceBus.Rfc1149
     {
         public static DirectoryInfo GetWorkingDirectory()
         {
-            return new DirectoryInfo(@"C:\Rfc1149\NServiceBus.Rfc1149");
             return DriveInfo.GetDrives()
                 .Where(d => d.DriveType == DriveType.Removable)
                 .Select(
@@ -25,6 +24,9 @@ namespace NServiceBus.Rfc1149
         {
             var workingDir = Utils.GetWorkingDirectory();
 
+            if (workingDir == null)
+                return null;
+
             string machineName = address.Machine;
             if (String.IsNullOrWhiteSpace(machineName))
                 machineName = Environment.MachineName;
@@ -32,17 +34,6 @@ namespace NServiceBus.Rfc1149
             string subdir = String.Format("{0}\\{1}", machineName, address.Queue);
 
             return workingDir.CreateSubdirectory(subdir);
-        }
-
-
-    }
-
-    public class Rfc1149Init : INeedInitialization
-    {
-
-        public void Init()
-        {
-            Configure.Instance.UseTransport<Rfc1149>();
         }
     }
 }
