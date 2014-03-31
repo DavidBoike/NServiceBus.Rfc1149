@@ -5,6 +5,10 @@
 
     /// <summary>
     /// A utility class that does a sleep on very call up to a limit based on a condition.
+    /// This is totally stolen from the NServiceBus.SqlServer transport. For RFC 1149, if
+    /// no flash drive is present, we don't want to check again a millisecond later, so the
+    /// backoff causes the retry delay to lengthen the longer it remains unavailable, up
+    /// until the maximum delay.
     /// </summary>
     class BackOff
     {

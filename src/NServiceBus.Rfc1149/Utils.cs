@@ -9,6 +9,11 @@ namespace NServiceBus.Rfc1149
 {
     public static class Utils
     {
+        /// <summary>
+        /// Find the first attached removable storage drive that contains an NServiceBus.Rfc1149 directory at the root level,
+        /// and use that as the working directory for all our queueing infrastructure.
+        /// </summary>
+        /// <returns>A DirectoryInfo</returns>
         public static DirectoryInfo GetWorkingDirectory()
         {
             return DriveInfo.GetDrives()
@@ -20,6 +25,11 @@ namespace NServiceBus.Rfc1149
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Map an NServiceBus Address to a queue directory.
+        /// </summary>
+        /// <param name="address">The address of the queue/param>
+        /// <returns>The directory corresponding to the queue.</returns>
         public static DirectoryInfo GetQueueDirectory(Address address)
         {
             var workingDir = Utils.GetWorkingDirectory();
